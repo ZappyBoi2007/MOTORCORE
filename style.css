@@ -14,3 +14,297 @@
 @media(max-width:390px){.state-pill{display:none}.emergency{font-size:7px;padding:8px 6px}.topbar{padding-inline:14px}.brand{font-size:16px}.intro{gap:7px}h1{font-size:24px}.session-meta{min-width:71px;font-size:7px}.control-value input{font-size:22px}.control-label{font-size:8px}.control-actions .button{font-size:9px;padding-inline:5px}.machine-code span{display:block}.machine-footer{font-size:7px}.readout strong{font-size:20px}.readout>span{font-size:8px}.readout small{font-size:7px}.power-details strong{font-size:8px}.speed-value strong{font-size:37px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
 @media print{body{background:white;color:#18232c}.topbar,.intro,.control-card,.machine-card,.instruments-card,.characteristics,.knowledge-grid,.page-footer,.table-actions,.table-footer,.toast,.comparison{display:none}.observations{border:1px solid #ccc;color:#111;background:white}main{padding:0}.observations-heading{padding:10px}th,td{color:#111;background:white;border-color:#ccc;font-size:9px;padding:7px}td button,td:first-child,th:first-child{display:none}.table-scroll{overflow:visible}.trial-state{color:#222}}
+
+/* MOTORCORE V2 — presentation layer. The original controls, SVG and physics remain. */
+:root{
+  --panel:#111c28;
+  --panel-raised:#192b38;
+  --line:#314250;
+  --muted:#a5b6c3;
+  --text:#edf6f8;
+  --teal:#67e5d0;
+  --cyan:#7bd8ee;
+  --amber:#f2bb83;
+}
+body{
+  background:
+    radial-gradient(ellipse 1000px 550px at 49% -160px,rgba(43,99,111,.16),transparent 74%),
+    linear-gradient(180deg,#0b131e 0%,#0b121b 100%);
+}
+.topbar{
+  background:linear-gradient(180deg,rgba(21,35,47,.96),rgba(12,23,34,.96));
+  border-bottom-color:#34505d;
+  box-shadow:0 7px 26px #030b1340;
+}
+.brand{letter-spacing:1.45px}
+.brand svg{filter:drop-shadow(0 0 6px #55d8c433)}
+.intro{margin-bottom:30px}
+.intro h1{font-size:clamp(28px,2.8vw,44px);font-weight:650;letter-spacing:-1.45px}
+.intro p{font-size:13px;color:#a9bfcc}
+.eyebrow,.micro{font-size:10px;letter-spacing:1.2px}
+.session-meta{font-size:10px}
+.session-clock{font-size:10px}
+.bench-grid{grid-template-columns:252px minmax(0,1fr) 292px;gap:18px}
+.card{
+  position:relative;
+  background:linear-gradient(155deg,rgba(24,41,54,.94),rgba(13,26,38,.97));
+  border-color:#344957;
+  box-shadow:inset 0 1px 0 #7894a222,0 14px 34px #02091027;
+  transition:border-color .22s ease,box-shadow .22s ease,transform .22s ease;
+}
+.card:hover{border-color:#55727e;box-shadow:inset 0 1px 0 #7894a222,0 16px 40px #0209103b}
+.card-heading{height:61px;border-color:#334b58}
+.card-heading h2{font-size:13px;letter-spacing:.15px}
+.section-number{color:#86b4bd;font-size:11px}
+.control-block{padding-top:23px;padding-bottom:20px}
+.control-label{font-size:12px;color:#d0dee5}
+.control-value input{font-size:31px;letter-spacing:-1.5px}
+.control-value>span{font-size:12px}
+.control-value input:focus-visible{background:#142835;border-color:#4a9a9c;outline-offset:1px}
+input[type=range]{height:6px;background:linear-gradient(to right,var(--accent) 0%,var(--accent) var(--fill),#384c59 var(--fill),#384c59 100%);transition:filter .18s ease}
+input[type=range]:hover{filter:brightness(1.14)}
+input[type=range]::-webkit-slider-thumb{width:16px;height:16px;box-shadow:0 0 0 4px #0a1827,0 0 9px var(--accent)}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;box-shadow:0 0 0 4px #0a1827,0 0 9px var(--accent)}
+.range-scale{font-size:9px;color:#9fb1be}
+.control-actions{margin-top:23px}
+.button{min-height:39px}
+.control-note{font-size:10px;color:#a7bbca}
+.presets button{font-size:10px;background:#1a2d3c;border-color:#37505c}
+.presets button:hover{background:#254454}
+.machine-card{
+  background:linear-gradient(155deg,rgba(28,49,61,.94),rgba(11,26,38,.97));
+  border-color:#45606b;
+  box-shadow:inset 0 1px 0 #9cc5c534,0 18px 45px #02091055;
+  isolation:isolate;
+}
+.machine-card::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 52% 30%,rgba(83,209,190,.07),transparent 52%);
+  opacity:.7;transition:opacity .3s ease;
+}
+.machine-card:hover::before{opacity:1}
+.machine-card>*{position:relative;z-index:1}
+.machine-card:has(.machine-active){
+  border-color:#508a89;
+  box-shadow:inset 0 1px 0 #9cc5c545,0 0 0 1px #62e2c21b,0 18px 45px #02091055;
+}
+.live-label{font-size:10px;letter-spacing:1.15px}
+.live-label i,.state-pill.running i{box-shadow:0 0 0 3px #64e0c724,0 0 8px #64e0c766}
+.state-pill.running i{animation:status-breathe 2.8s ease-in-out infinite}
+@keyframes status-breathe{50%{opacity:.44;box-shadow:0 0 0 5px #64e0c712,0 0 4px #64e0c733}}
+.machine-topline{padding-top:19px;padding-bottom:5px}
+.machine-code{font-size:11px;letter-spacing:.8px}
+.machine-code span{font-size:9px}
+#rotation-status{font-size:10px;color:#b4e7dd}
+.view-toolbar{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  margin:8px 21px 0;padding:7px 8px 7px 12px;
+  border:1px solid #38505d;border-radius:7px;
+  background:linear-gradient(90deg,#122938c7,#1b34408c);
+}
+.view-toolbar-label{font:9px var(--mono);letter-spacing:.95px;color:#b2c8cf;white-space:nowrap}
+.view-toolbar-label b{color:#75cdbd;font-weight:400}
+.view-toggle{display:inline-flex;gap:3px;padding:2px;border:1px solid #375362;background:#0d202d;border-radius:5px}
+.view-toggle button{border:0;border-radius:3px;padding:5px 9px;background:transparent;color:#a9bfcb;font:9px var(--mono);white-space:nowrap}
+.view-toggle button[aria-pressed="true"]{background:#29545b;color:#e2fff7;box-shadow:inset 0 1px 0 #8ce7d753}
+.view-toggle button:hover{color:#fff;background:#254450}
+.view-toggle button[aria-pressed="true"]:hover{background:#2c6367}
+.motor-stage{
+  min-height:340px;
+  overflow:hidden;
+  background:radial-gradient(ellipse 62% 57% at 46% 49%,#1d455254,transparent 75%);
+  --view-angle:-6deg;--view-scale:1.04;
+}
+.motor-stage::before{
+  content:"";position:absolute;inset:10px 18px;
+  border:1px solid #66879721;border-radius:5px;pointer-events:none;
+}
+.stage-grid{
+  inset:12px 17px;
+  background-image:linear-gradient(#7db4c30d 1px,transparent 1px),linear-gradient(90deg,#7db4c30d 1px,transparent 1px);
+  background-size:27px 27px;
+  mask-image:linear-gradient(90deg,transparent,#000 13%,#000 87%,transparent);
+}
+#motor-svg{
+  width:100%;height:auto;max-width:none;overflow:visible;
+  transform:perspective(1150px) rotateY(var(--view-angle)) scale(var(--view-scale));
+  transform-origin:50% 54%;
+  transition:transform .28s ease;
+}
+.motor-stage.classic-view #motor-svg{transform:none}
+.motor-stage.classic-view .twin-only,.motor-stage.classic-view .stage-hud,.motor-stage.classic-view .stage-orbit,.motor-stage.classic-view .stage-bracket{display:none}
+.stage-hud,.stage-orbit{
+  position:absolute;z-index:2;pointer-events:none;
+  background:#0d202ab8;border:1px solid #51848b78;
+  border-radius:5px;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  box-shadow:inset 0 1px 0 #9fd7d723;
+}
+.stage-hud{left:28px;top:32px;padding:9px 11px}
+.stage-hud span,.stage-orbit small{display:block;color:#85aab5;font:8px var(--mono);letter-spacing:1px}
+.stage-hud strong{display:block;color:#d3eef0;font:10px var(--mono);letter-spacing:.65px;margin-top:3px}
+.stage-hud i{color:var(--teal);font-style:normal}
+.stage-orbit{right:26px;bottom:29px;padding:7px 11px;text-align:right;min-width:98px}
+.stage-orbit>span{display:block;color:#8ce9d8;font:20px var(--mono);line-height:1.1;font-variant-numeric:tabular-nums}
+.stage-orbit small{font-size:8px;margin-top:3px}
+.stage-bracket{position:absolute;z-index:2;width:22px;height:22px;pointer-events:none;opacity:.58}
+.bracket-one{left:18px;bottom:18px;border-left:2px solid #6cb8b8;border-bottom:2px solid #6cb8b8}
+.bracket-two{right:18px;top:18px;border-right:2px solid #6cb8b8;border-top:2px solid #6cb8b8}
+.svg-label{fill:#b1c7d0}
+.view-adjustments{
+  display:grid;grid-template-columns:auto minmax(48px,1fr) auto minmax(48px,1fr) auto;
+  align-items:center;gap:9px;margin:0 21px 14px;padding:10px 12px;
+  border:1px solid #344d59;border-radius:6px;background:#0b1b27aa;
+}
+.view-adjustments label{font:9px var(--mono);letter-spacing:.45px;color:#acc3cc;white-space:nowrap}
+.view-adjustments label output{color:#76dfce;margin-left:5px}
+.view-adjustments input[type=range]{--accent:#72c7c5;margin:0;height:4px;min-width:0}
+.view-adjustments input:disabled{opacity:.35;cursor:default}
+.view-adjustments button{background:#203948;border-color:#446371;color:#bfd3d9;border-radius:4px;font:9px var(--mono);padding:6px 8px;white-space:nowrap}
+.view-adjustments button:hover:not(:disabled){background:#315460}
+.view-adjustments button:disabled{opacity:.4;cursor:default}
+.machine-footer{font-size:9px;padding-bottom:16px}
+.machine-footer small{font-size:9px}
+.circuit-strip{background:#0c1c29a8;border-color:#36505c;padding-left:11px;padding-right:11px;border-radius:6px}
+.circuit-strip .micro{font-size:8px}
+.circuit-current span{font-size:8px}
+.status-area{min-height:93px}
+.status-message{font-size:11px;line-height:1.5}
+.instruments-card{background:linear-gradient(165deg,#172b37,#0e1c2a)}
+.speed-instrument{background:linear-gradient(90deg,#142b36,#172d3855);padding-top:22px;padding-bottom:19px}
+.speed-value strong{font-size:clamp(39px,3.4vw,58px);text-shadow:0 0 19px #5de5c72b}
+.settle-label{font-size:10px}
+.readout{padding-top:17px;padding-bottom:16px}
+.readout>span{font-size:10px;line-height:1.3;min-height:25px}
+.readout strong{font-size:25px}
+.readout small{font-size:10px}
+.instrument-note{font-size:10px;min-height:47px}
+.power-details>div{font-size:10px}
+.power-details strong{font-size:11px}
+.record-button{font-size:11px;min-height:40px}
+.graph-card{background:linear-gradient(165deg,#162735,#0e1e2b)}
+.graph-card:hover{border-color:#52827e}
+.graph-heading h3{font-size:13px}
+.graph-card>p,.graph-foot{font-size:10px}
+.graph-legend{font-size:10px}
+.section-description{font-size:11px}
+.observations-heading p{font-size:11px}
+th{font-size:10px}
+.table-footer{font-size:9px}
+.details-body{font-size:12px}
+.safety-footnote{font-size:10px}
+@media (prefers-reduced-motion:no-preference){
+  .intro,.bench-grid>.card,.characteristics,.observations,.knowledge-grid{animation:panel-rise .55s both}
+  .bench-grid>.card:nth-child(2){animation-delay:.06s}
+  .bench-grid>.card:nth-child(3){animation-delay:.12s}
+  .characteristics{animation-delay:.14s}
+  .observations{animation-delay:.2s}
+  @keyframes panel-rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+}
+@media(max-width:1150px){
+  .bench-grid{grid-template-columns:228px minmax(0,1fr) 242px;gap:12px}
+  .card-heading h2{font-size:12px}
+  .readout strong{font-size:21px}
+  .readout small{font-size:9px}
+  .stage-hud{left:18px;top:22px}
+  .stage-orbit{right:18px;bottom:20px}
+  .view-toolbar{margin-inline:14px}
+  .view-adjustments{margin-inline:14px;gap:6px;padding-inline:9px}
+  .view-adjustments label{font-size:8px}
+  .view-adjustments button{font-size:8px;padding-inline:5px}
+}
+@media(max-width:950px){
+  .bench-grid{grid-template-columns:240px minmax(0,1fr)}
+  .machine-card{grid-column:2}
+  .instruments-card{grid-column:1/-1}
+  .readout-grid .readout{padding:13px 15px}
+  .readout>span{min-height:0}
+  .speed-value strong{font-size:44px}
+  .stage-hud{top:19px}
+  .stage-orbit{bottom:16px}
+}
+@media(max-width:700px){
+  .topbar{padding-inline:17px}
+  .intro{margin-bottom:20px}
+  .intro h1{font-size:29px}
+  .intro p{font-size:12px}
+  .bench-grid{grid-template-columns:minmax(0,1fr);gap:14px}
+  .control-card,.machine-card,.instruments-card{grid-column:1}
+  .card-heading{height:55px}
+  .card-heading h2{font-size:13px}
+  .control-block{padding-top:15px;padding-bottom:14px}
+  .control-label{font-size:11px}
+  .control-value input{font-size:25px}
+  .motor-stage{min-height:255px}
+  #motor-svg{width:110%;flex:0 0 110%;margin-left:-5%}
+  .stage-hud{left:15px;top:18px;padding:7px 8px}
+  .stage-hud span{font-size:7px}
+  .stage-hud strong{font-size:8px}
+  .stage-orbit{right:15px;bottom:18px;min-width:79px;padding:5px 7px}
+  .stage-orbit>span{font-size:16px}
+  .stage-orbit small{font-size:7px}
+  .svg-label{display:none}
+  .view-toolbar-label{font-size:8px}
+  .view-toggle button{font-size:8px;padding:5px 7px}
+  .view-adjustments{grid-template-columns:auto minmax(20px,1fr) auto minmax(20px,1fr) auto}
+  .view-adjustments label{font-size:8px}
+  .machine-footer{font-size:9px}
+  .readout>span{font-size:10px}
+  .readout strong{font-size:23px}
+  .power-details>div{font-size:9px}
+  .graph-heading h3{font-size:12px}
+  .graph-card>p,.graph-foot{font-size:10px}
+}
+@media(max-width:520px){
+  .control-card{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .control-card .card-heading{grid-column:1/-1}
+  .control-block{padding:15px 14px 12px}
+  .control-block.teal{border-right:0}
+  .control-block.amber{grid-column:1/-1;border-top:1px solid var(--line);border-right:0}
+  .control-block.amber .control-value input{width:90px}
+  .control-label{font-size:11px}
+  .control-value input{width:80px;max-width:calc(100% - 23px)}
+  .control-actions{grid-column:1/-1;grid-row:auto;margin:12px 14px 5px}
+  .control-note{grid-column:1/-1;grid-row:auto;margin:0 14px;min-height:0}
+  .presets{grid-column:1/-1;margin:9px 14px 0}
+  .motor-stage{min-height:238px}
+  .machine-code span{display:block;margin-left:0}
+  .view-toolbar{gap:4px;padding:5px}
+  .view-toolbar-label{font-size:7px}
+  .view-toggle button{font-size:7px;padding:5px}
+  .view-adjustments{grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr);row-gap:7px;margin-bottom:11px}
+  .view-adjustments button{grid-column:1/-1;justify-self:end}
+  .stage-hud span{display:none}
+  .stage-hud strong{margin:0}
+  .stage-orbit{bottom:11px;right:11px}
+  .circuit-strip .micro{font-size:7px}
+  .circuit-current span{font-size:7px}
+  .readout-grid .readout{padding:13px 9px}
+  .readout strong{font-size:clamp(16px,5vw,22px);overflow-wrap:anywhere}
+  .readout small{font-size:8px;margin-left:2px}
+  .readout>span{font-size:9px;min-height:25px}
+  .speed-value strong{font-size:clamp(33px,10vw,42px)}
+  .power-details>div{gap:3px;font-size:8px}
+  .power-details strong{font-size:9px}
+}
+@media(max-width:360px){
+  .view-toolbar-label{display:none}
+  .view-toggle{margin-left:auto}
+  .stage-hud{display:none}
+  .machine-footer{font-size:8px}
+  .control-value input{font-size:22px}
+  .power-details{padding-inline:10px}
+  .power-details strong{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .state-pill.running i,.intro,.bench-grid>.card,.characteristics,.observations,.knowledge-grid{animation:none!important}
+  #motor-svg,.card,.machine-card::before,input[type=range]{transition:none!important}
+}
+
+/* Contextual highlights stay static; only the small status lamp breathes. */
+.instruments-card.is-live{border-color:#4c777c;box-shadow:inset 0 1px 0 #9cc5c534,0 0 0 1px #62e2c214,0 15px 35px #02091034}
+.readout:hover{background:radial-gradient(ellipse at 50% 10%,#5de5c71b,transparent 76%)}
+.control-block:focus-within .control-label label{color:#f2fffd}
+.control-block:focus-within{background:linear-gradient(90deg,#5de5c70a,transparent 74%)}
+.graph-card:hover .canvas-wrap{background:radial-gradient(ellipse at 52% 32%,#5de5c70b,transparent 76%)}
+.motor-stage:not(.classic-view) .svg-label{display:none}
+@media(prefers-reduced-motion:reduce){.readout,.control-block,.graph-card .canvas-wrap{transition:none!important}}

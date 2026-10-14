@@ -6,6 +6,30 @@
   let nextTrial = 1, previousFrame = null, previousReadout = -Infinity, previousGraph = -Infinity;
   let angle = 0, particlePhase = 0, toastTimer = 0, lastSafety = '';
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const stage = $('motor-stage'), twinRotor = $('twin-rotor'), currentGlow = $('twin-current-glow');
+  const viewAngle = $('view-angle'), viewZoom = $('view-zoom');
+  function applyView() {
+    stage.style.setProperty('--view-angle', viewAngle.value + 'deg');
+    stage.style.setProperty('--view-scale', (Number(viewZoom.value) / 100).toFixed(2));
+    viewAngle.style.setProperty('--fill', ((Number(viewAngle.value) + 14) / 28 * 100).toFixed(1) + '%');
+    viewZoom.style.setProperty('--fill', ((Number(viewZoom.value) - 100) / 18 * 100).toFixed(1) + '%');
+    $('view-angle-value').textContent = (Number(viewAngle.value) < 0 ? '−' : '+') + Math.abs(Number(viewAngle.value)) + '°';
+    $('view-zoom-value').textContent = viewZoom.value + '%';
+  }
+  [viewAngle, viewZoom].forEach(input => input.addEventListener('input', applyView));
+  $('view-reset').addEventListener('click', () => { viewAngle.value = '-6'; viewZoom.value = '104'; applyView(); });
+  function setViewMode(classic) {
+    stage.classList.toggle('classic-view', classic);
+    $('view-twin').setAttribute('aria-pressed', String(!classic));
+    $('view-classic').setAttribute('aria-pressed', String(classic));
+    viewAngle.disabled = viewZoom.disabled = $('view-reset').disabled = classic;
+    $('motor-svg-desc').textContent = classic
+      ? 'Original SVG motor. Rotor and shaft follow simulated speed at one fortieth scale.'
+      : 'Enhanced SVG digital twin. Rotor and shaft follow simulated speed at one fortieth scale. Angle and zoom affect appearance only.';
+  }
+  $('view-twin').addEventListener('click', () => setViewMode(false));
+  $('view-classic').addEventListener('click', () => setViewMode(true));
+  applyView(); setViewMode(false);
   const display = (number, digits = 2) => (Math.abs(number) < .5 * Math.pow(10, -digits) ? 0 : number).toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
   const signed = (number, digits = 1) => (number >= 0 ? '+' : '') + display(number, digits);
   const setText = (id, text) => { const node = $(id); if (node.textContent !== String(text)) node.textContent = text; };
@@ -105,6 +129,10 @@
     setText('loss-value', display((r.copperLoss + r.frictionLoss) / 1000, 3) + ' kW');
     setText('field-power-value', display(r.fieldPower, 0) + ' W'); setText('flux-value', display(r.K, 3));
     setText('sim-time', clock(r.time));
+    setText('stage-rpm', String(Math.round(r.rpm)).padStart(4, '0'));
+    currentGlow.style.opacity = r.connected ? Math.min(Math.abs(r.current) / 140, .65).toFixed(2) : '0';
+    stage.classList.toggle('machine-active', r.connected && r.rpm > .5);
+    $('instrument-panel').classList.toggle('is-live', r.connected);
     setText('settle-state', r.stalled ? 'Stalled · zero shaft output' : !r.connected ? 'Armature disconnected' : r.braking ? 'Electrical braking · negative Iₐ' : r.settled ? 'Steady state · prediction reached' : 'Transient · acceleration ' + display(r.alpha, 1) + ' rad/s²');
     const note = r.efficiency !== null ? 'Steady motoring · includes 120 V field supply input.' : r.braking ? 'Efficiency undefined during electrical braking; signed input is shown below.' : !r.connected ? 'Armature open. Field supply still consumes power.' : r.stalled ? 'Stall: zero useful output. Efficiency is not displayed.' : r.load === 0 ? 'No external load: useful shaft output is zero. Efficiency not displayed.' : 'Efficiency available after the motor reaches steady motoring.';
     setText('efficiency-note', note);
@@ -193,6 +221,7 @@
       angle = (angle + r.omega * 180 / Math.PI * dt / 40) % 360;
       particlePhase = (particlePhase + Math.sign(r.current) * Math.min(Math.abs(r.current) * 2, 110) * dt + 90) % 90;
       $('rotor').setAttribute('transform', 'rotate(' + angle.toFixed(3) + ')');
+      twinRotor.setAttribute('transform', 'rotate(' + angle.toFixed(3) + ')');
       $('load-rotor').setAttribute('transform', 'rotate(' + angle.toFixed(3) + ')');
       $('shaft-stripe').setAttribute('d', 'M447 ' + (199 + Math.sin(angle * Math.PI / 180) * 8).toFixed(2) + 'h80');
       $('winding-highlight').setAttribute('d', 'M242 ' + (201 + Math.sin(angle * Math.PI / 180) * 23).toFixed(2) + 'h181');

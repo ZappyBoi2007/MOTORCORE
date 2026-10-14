@@ -2,6 +2,12 @@
 
 A completely offline, interactive simulator of a separately excited DC motor. Built for SIMULAB 2026 with HTML5, CSS3, vanilla JavaScript, inline SVG and native Canvas.
 
+## V2 digital twin display
+
+The enhanced motor view adds static metallic and copper material layers, a softly lit engineering stage, and a second rotor illustration synchronized to the same simulated angle as the original. The status overlay uses actual calculated RPM and armature current. Select **Classic SVG** in the machine card to reveal the original motor artwork; the original rotor, shaft and field elements remain underneath and keep running. This is the built-in visual fallback.
+
+**View angle** and **Zoom** change only the SVG presentation. They do not change speed, power, graph predictions or recorded data. **Reset view** restores the default framing. The view controls are disabled in Classic SVG mode. Reduced-motion settings suppress decorative rotor motion while preserving live readings and calculations.
+
 ## Open the simulator
 
 1. Open `C:\Users\Keith\Documents\MOTORCORE` in File Explorer.
@@ -119,7 +125,7 @@ The layout adapts to mobile widths; the wide observation table scrolls horizonta
 
 ## Verification and limitations
 
-All six requested files were created. JavaScript syntax checks passed. Twenty-two dependency-free automated checks passed, including:
+All six requested files were created. JavaScript syntax checks passed. Twenty-four dependency-free automated checks passed, including:
 
 - 105 voltage/field/load operating points converging to the specified equilibrium.
 - Transient integration compared with the analytic solution and friction-only coast decay.
@@ -127,8 +133,8 @@ All six requested files were created. JavaScript syntax checks passed. Twenty-tw
 - Application initialization and all three Canvas drawing paths in a test DOM.
 - Controls, presets, recording, comparison, row removal, CSV generation/download wiring, warning states, keyboard shortcuts and emergency-stop rearming.
 - Hidden-tab timing, local resource references, unique HTML IDs and ordinary deferred script order.
+- V2 view switching, visual-only angle/zoom controls, and the original and enhanced rotors sharing one simulation-driven phase.
 
 The automated preview browser refused file:// navigation under its URL security policy. Consequently actual-browser visual layout, rendering, download behavior and console output could not be directly observed in this session. Automated DOM/Canvas checks are not a substitute for visual browser verification. No packages were installed; the application itself needs no developer runtime.
 
 No requested feature is intentionally incomplete. These are educational model assumptions, not a replacement for physical motor commissioning or manufacturer protection settings.
-
