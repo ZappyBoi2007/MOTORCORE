@@ -7,6 +7,7 @@
   let angle = 0, particlePhase = 0, toastTimer = 0, lastSafety = '';
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   const stage = $('motor-stage'), twinRotor = $('twin-rotor'), currentGlow = $('twin-current-glow');
+  const effects = window.MotorEffects ? new window.MotorEffects() : null;
   const viewAngle = $('view-angle'), viewZoom = $('view-zoom');
   function applyView() {
     stage.style.setProperty('--view-angle', viewAngle.value + 'deg');
@@ -132,6 +133,7 @@
     setText('stage-rpm', String(Math.round(r.rpm)).padStart(4, '0'));
     currentGlow.style.opacity = r.connected ? Math.min(Math.abs(r.current) / 140, .65).toFixed(2) : '0';
     stage.classList.toggle('machine-active', r.connected && r.rpm > .5);
+    if (effects) effects.update(r);
     $('instrument-panel').classList.toggle('is-live', r.connected);
     setText('settle-state', r.stalled ? 'Stalled · zero shaft output' : !r.connected ? 'Armature disconnected' : r.braking ? 'Electrical braking · negative Iₐ' : r.settled ? 'Steady state · prediction reached' : 'Transient · acceleration ' + display(r.alpha, 1) + ' rad/s²');
     const note = r.efficiency !== null ? 'Steady motoring · includes 120 V field supply input.' : r.braking ? 'Efficiency undefined during electrical braking; signed input is shown below.' : !r.connected ? 'Armature open. Field supply still consumes power.' : r.stalled ? 'Stall: zero useful output. Efficiency is not displayed.' : r.load === 0 ? 'No external load: useful shaft output is zero. Efficiency not displayed.' : 'Efficiency available after the motor reaches steady motoring.';
@@ -215,7 +217,7 @@
     if (event.key === 'Escape') { event.preventDefault(); emergencyStop(); return; }
     if (event.key.toLowerCase() === 'r' && !event.repeat && !event.ctrlKey && !event.altKey && !event.metaKey && !event.target.closest('input, textarea, select, [contenteditable="true"]')) { event.preventDefault(); record(); }
   });
-  document.addEventListener('visibilitychange', () => { previousFrame = null; });
+  document.addEventListener('visibilitychange', () => { previousFrame = null; if (effects) effects.setPaused(document.hidden); });
   function animate(dt, r) {
     if (!motionPreference.matches) {
       angle = (angle + r.omega * 180 / Math.PI * dt / 40) % 360;
@@ -238,7 +240,7 @@
   function frame(timestamp) {
     const dt = previousFrame === null || document.hidden ? 0 : Math.min(Math.max((timestamp - previousFrame) / 1000, 0), P.C.maxFrame);
     previousFrame = timestamp;
-    if (!document.hidden) { motor.step(dt); animate(dt, motor.read()); }
+    if (!document.hidden) { motor.step(dt); const frameReading = motor.read(); animate(dt, frameReading); if (effects) effects.tick(timestamp, dt, frameReading); }
     if (timestamp - previousReadout >= 80) { render(); previousReadout = timestamp; }
     if (timestamp - previousGraph >= 160) { graphs.update(motor, motor.read()); previousGraph = timestamp; }
     requestAnimationFrame(frame);

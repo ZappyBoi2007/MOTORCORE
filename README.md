@@ -2,6 +2,18 @@
 
 A completely offline, interactive simulator of a separately excited DC motor. Built for SIMULAB 2026 with HTML5, CSS3, vanilla JavaScript, inline SVG and native Canvas.
 
+## V3 reactive energy display
+
+Three display states follow the existing motor model: **Standby** keeps near-black/navy lighting after an ordinary armature disconnect; **Energized** adds restrained cyan and copper illumination while the armature is connected; **Emergency stop** switches to a dark crimson atmosphere while the rotor continues its physical coast-down. Releasing the stop latch returns to standby. Visual color changes take about 0.78 seconds and never delay safety readings or change electrical calculations.
+
+The blue field outline represents regulated field excitation. Its intensity follows the selected field current and is visible even with the armature open, because the field remains energized. The amber copper glow is linked to actual armature current magnitude. The cyan/amber trails behind the motor appear only after the shaft begins turning and respond to actual RPM. These are **illustrative visual effects**, not literal sparks or additional energy terms in the equations.
+
+The energized viewport and instrument panel have small animated SVG rim segments inspired by ElectricBorder. They use no WebGL or external code. The motor trails use one local Canvas 2D layer, capped at 30 frames per second on desktop and 20 on mobile, with at most ten paths (six on mobile). Decorations pause when the tab is hidden. CSS lighting remains usable if Canvas is unavailable. **Classic SVG** hides the motor aura, trails and electric viewport rim, preserving the original SVG motor.
+
+Fine-pointer devices receive a soft radial highlight in key panels. Clicks on the run, record, emergency-stop and preset buttons create a short visual pulse; the emergency pulse is red. Reduced-motion settings disable decorative motion and pulses. Existing live instrument numbers continue to display actual simulated values directly, without a visual counter lag. Lower sections have one gentle scroll reveal when IntersectionObserver is available and remain visible when it is not.
+
+All V3 effects are in the local effects.js file, loaded as a deferred script between graphs.js and app.js. The simulator does not make network requests, import packages or depend on WebGL. Physics and graph source are unchanged.
+
 ## V2 digital twin display
 
 The enhanced motor view adds static metallic and copper material layers, a softly lit engineering stage, and a second rotor illustration synchronized to the same simulated angle as the original. The status overlay uses actual calculated RPM and armature current. Select **Classic SVG** in the machine card to reveal the original motor artwork; the original rotor, shaft and field elements remain underneath and keep running. This is the built-in visual fallback.
@@ -22,10 +34,11 @@ There is no installation, build, server, internet connection, external font, CDN
 - `style.css`: responsive industrial dashboard and reduced-motion/print styles.
 - `physics.js`: numerical motor model, power accounting and equilibrium calculations.
 - `graphs.js`: three high-DPI Canvas characteristic graphs and curve inspection.
+- `effects.js`: reactive ambient state, small electric borders, motor trails, spotlight and brief interaction pulses.
 - `app.js`: controls, simulation loop, motor animation, safety states and observations.
 - `README.md`: operating guide, assumptions and verification notes.
 
-Scripts are ordinary deferred scripts in this dependency order: physics.js, graphs.js, app.js. No module loader is used.
+Scripts are ordinary deferred scripts in this dependency order: physics.js, graphs.js, effects.js, app.js. No module loader is used.
 
 ## Quick experiment
 
@@ -125,7 +138,7 @@ The layout adapts to mobile widths; the wide observation table scrolls horizonta
 
 ## Verification and limitations
 
-All six requested files were created. JavaScript syntax checks passed. Twenty-four dependency-free automated checks passed, including:
+The original six required files remain, with one local visual effects script added. JavaScript syntax checks passed. Twenty-seven dependency-free automated checks passed, including:
 
 - 105 voltage/field/load operating points converging to the specified equilibrium.
 - Transient integration compared with the analytic solution and friction-only coast decay.
@@ -134,6 +147,7 @@ All six requested files were created. JavaScript syntax checks passed. Twenty-fo
 - Controls, presets, recording, comparison, row removal, CSV generation/download wiring, warning states, keyboard shortcuts and emergency-stop rearming.
 - Hidden-tab timing, local resource references, unique HTML IDs and ordinary deferred script order.
 - V2 view switching, visual-only angle/zoom controls, and the original and enhanced rotors sharing one simulation-driven phase.
+- V3 standby/energized/emergency state transitions, normal-disconnect coast-down, motor trail rendering, and hidden-tab decorative pause.
 
 The automated preview browser refused file:// navigation under its URL security policy. Consequently actual-browser visual layout, rendering, download behavior and console output could not be directly observed in this session. Automated DOM/Canvas checks are not a substitute for visual browser verification. No packages were installed; the application itself needs no developer runtime.
 

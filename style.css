@@ -308,3 +308,81 @@ th{font-size:10px}
 .graph-card:hover .canvas-wrap{background:radial-gradient(ellipse at 52% 32%,#5de5c70b,transparent 76%)}
 .motor-stage:not(.classic-view) .svg-label{display:none}
 @media(prefers-reduced-motion:reduce){.readout,.control-block,.graph-card .canvas-wrap{transition:none!important}}
+
+/* V3: reactive presentation. All values come from app.js readings; no model changes. */
+body{position:relative;--electric-alpha:0;--field-alpha:.32}
+body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;transition:opacity .78s ease}
+body::before{opacity:0;background:radial-gradient(ellipse 58% 48% at 51% 20%,#1b71822b,transparent 76%),radial-gradient(ellipse 36% 43% at 70% 52%,#a26b3220,transparent 77%)}
+body::after{opacity:0;background:radial-gradient(ellipse 78% 61% at 50% 8%,#872c3c4a,transparent 80%),linear-gradient(90deg,#40182433,transparent 25%,transparent 75%,#40182433)}
+body[data-energy="energized"]::before{opacity:1}
+body[data-energy="emergency"]::after{opacity:1}
+.topbar,main{position:relative;z-index:1}
+.topbar,.card,.emergency,.state-pill,.motor-stage,.stage-hud,.stage-orbit,.speed-instrument,.readout,.control-block{transition:border-color .78s ease,box-shadow .78s ease,background-color .78s ease,color .78s ease}
+body[data-energy="energized"] .topbar{border-bottom-color:#3c797f;box-shadow:0 7px 35px #0d4d5330}
+body[data-energy="emergency"] .topbar{border-bottom-color:#a24a5a;box-shadow:0 7px 35px #6d1b2c35}
+body[data-energy="emergency"] .card{border-color:#65414f;box-shadow:inset 0 1px 0 #e694a31c,0 13px 36px #1c071344}
+body[data-energy="emergency"] .machine-card{border-color:#a95061;box-shadow:inset 0 1px 0 #e694a339,0 0 0 1px #b9566522,0 19px 46px #17080e70}
+body[data-energy="emergency"] .machine-card::before{background:radial-gradient(circle at 52% 31%,#bb485922,transparent 59%);opacity:.7}
+body[data-energy="emergency"] .motor-stage{background:radial-gradient(ellipse 68% 59% at 48% 50%,#782d3b36,transparent 79%)}
+body[data-energy="emergency"] .state-pill{color:#ffd0d6;padding:6px 8px;border:1px solid #9b5260;border-radius:4px;background:#6b273444;letter-spacing:.5px}
+body[data-energy="emergency"] .state-pill i{box-shadow:0 0 0 3px #e3697830}
+body[data-energy="emergency"] .emergency{border-color:#ca6b7a;background:#612635;color:#fff3f3}
+body[data-energy="emergency"] .stage-hud,body[data-energy="emergency"] .stage-orbit{border-color:#af647076;background:#301822bb}
+body[data-energy="emergency"] .stage-hud i,body[data-energy="emergency"] .stage-orbit>span{color:#ffb8c3}
+body[data-energy="emergency"] .status-area{background:linear-gradient(90deg,#5c1c3033,transparent 82%)}
+body[data-energy="emergency"] .speed-instrument{background:linear-gradient(90deg,#40202d80,transparent)}
+body[data-energy="emergency"] .speed-value strong{color:#f2b7c1;text-shadow:none}
+body[data-energy="emergency"] .live-label{color:#f2a6af}
+body[data-energy="emergency"] .live-label i{background:#ed8f9c;box-shadow:0 0 0 3px #e2697830}
+body[data-energy="energized"] .control-block.cyan,body[data-energy="energized"] .control-block.teal{box-shadow:inset 2px 0 0 #55d9ca75;background:linear-gradient(90deg,#55d9ca0b,transparent 73%)}
+body[data-energy="energized"] .control-block.amber{box-shadow:inset 2px 0 0 #e5aa6c54}
+body[data-energy="energized"] .instruments-card{border-color:#4f888c;box-shadow:inset 0 1px 0 #91d6d63a,0 0 0 1px #69dfd016,0 15px 37px #020c1647}
+body[data-energy="energized"] .speed-instrument{background:linear-gradient(90deg,#1b474d56,transparent)}
+body[data-energy="energized"] .readout:first-child{background:radial-gradient(ellipse at 40% 0,#42bcbb16,transparent 75%)}
+body[data-energy="energized"] .machine-card::before{opacity:var(--electric-alpha)}
+body[data-energy="energized"] .stage-orbit{border-color:#63c8bf9c;box-shadow:inset 0 1px 0 #9fd7d737,0 0 17px #27a9aa1c}
+body[data-energy="energized"] #twin-current-glow{transition:opacity .65s ease}
+body[data-energy="emergency"] #twin-current-glow{opacity:0!important;transition:opacity .55s ease}
+.energy-trails{position:absolute;inset:0;z-index:0;width:100%;height:100%;pointer-events:none;opacity:1;transition:opacity .72s ease}
+body[data-energy="emergency"] .energy-trails{opacity:0}
+#motor-svg{z-index:1}
+.field-aura{opacity:var(--field-alpha);stroke-dashoffset:0;animation:field-flow 13s linear infinite;transition:opacity .7s ease}
+@keyframes field-flow{to{stroke-dashoffset:-180}}
+body[data-energy="energized"] .field-aura{opacity:.54}
+body[data-energy="emergency"] .field-aura{opacity:0}
+.energy-border{position:absolute;pointer-events:none;z-index:4;overflow:visible;opacity:0;transition:opacity .76s ease}
+.motor-energy-border{inset:9px 17px;width:calc(100% - 34px);height:calc(100% - 18px)}
+.panel-energy-border{inset:5px;width:calc(100% - 10px);height:calc(100% - 10px)}
+.electric-base,.electric-dash{fill:none;vector-effect:non-scaling-stroke}
+.electric-base{stroke:#83d5d36f;stroke-width:1}
+.electric-dash{stroke:#a1fff2;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:10 90;stroke-dashoffset:0}
+@keyframes electric-orbit{to{stroke-dashoffset:-100}}
+body[data-energy="energized"] .motor-energy-border{opacity:.86}
+body[data-energy="energized"] .panel-energy-border{opacity:.46}
+body[data-energy="energized"] .electric-dash{animation:electric-orbit 8.5s linear infinite}
+body[data-energy="emergency"] .energy-border{opacity:.5}
+body[data-energy="emergency"] .electric-base{stroke:#f18c9d}
+body[data-energy="emergency"] .electric-dash{stroke:#d65e74;stroke-dasharray:none;stroke-width:1.2;animation:none}
+.motor-stage.classic-view .energy-trails,.motor-stage.classic-view .field-aura,.motor-stage.classic-view .motor-energy-border{display:none}
+.energy-legend{color:#88acb6;font:8px var(--mono);letter-spacing:.9px;white-space:nowrap}
+body[data-energy="energized"] .energy-legend{color:#a5ded6}
+body[data-energy="emergency"] .energy-legend{color:#d2a5ae}
+.spotlight-card{isolation:isolate}
+.spotlight-card::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;opacity:0;background:radial-gradient(270px circle at var(--spot-x,50%) var(--spot-y,30%),#69d8d71b,transparent 75%);transition:opacity .38s ease}
+.spotlight-card>*:not(.energy-border){position:relative;z-index:1}
+@media(hover:hover) and (pointer:fine){.spotlight-card:hover::after{opacity:1}}
+.control-card::after{background:radial-gradient(230px circle at var(--spot-x,50%) var(--spot-y,30%),#6fd5d41a,transparent 76%)}
+body[data-energy="emergency"] .spotlight-card::after{background:radial-gradient(260px circle at var(--spot-x,50%) var(--spot-y,30%),#d65e7418,transparent 76%)}
+.impact-pulse{position:fixed;z-index:30;width:45px;height:45px;margin:-22.5px 0 0 -22.5px;border:1.5px solid #8deada;border-radius:50%;box-shadow:0 0 12px #66d9d44c;pointer-events:none;animation:impact-release .46s ease-out forwards}
+.impact-pulse::before,.impact-pulse::after{content:"";position:absolute;top:50%;left:50%;width:25px;height:1px;background:#ecc18a;transform:translate(-50%,-50%) rotate(45deg);opacity:.8}
+.impact-pulse::after{transform:translate(-50%,-50%) rotate(-45deg);background:#84ddd7}
+.impact-pulse.impact-danger{border-color:#f491a1;box-shadow:0 0 14px #dd526b66}
+.impact-danger::before,.impact-danger::after{background:#f1a7b4}
+@keyframes impact-release{from{opacity:.85;transform:scale(.25)}to{opacity:0;transform:scale(1.15)}}
+.reveal-pending{animation:none!important;opacity:0;transform:translateY(16px)}
+.reveal-complete{animation:section-arrive .52s ease-out both!important}
+@keyframes section-arrive{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+body.visuals-paused .field-aura,body.visuals-paused .electric-dash{animation-play-state:paused!important}
+@media(max-width:950px){.energy-legend{flex-basis:100%}.spotlight-card::after{background-size:auto}}
+@media(max-width:700px){.motor-energy-border{inset:8px;width:calc(100% - 16px);height:calc(100% - 16px)}.energy-legend{font-size:7px}.panel-energy-border{inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}.spotlight-card::after{display:none}}
+@media(prefers-reduced-motion:reduce){body::before,body::after,.energy-border,.energy-trails,.field-aura,.impact-pulse,.spotlight-card::after{animation:none!important;transition:none!important}.impact-pulse{display:none}.field-aura{opacity:.22}.reveal-pending{opacity:1;transform:none}.reveal-complete{animation:none!important}}
