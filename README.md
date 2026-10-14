@@ -2,6 +2,14 @@
 
 A completely offline, interactive simulator of a separately excited DC motor. Built for SIMULAB 2026 with HTML5, CSS3, vanilla JavaScript, inline SVG and native Canvas.
 
+## Electric border and motor explorer
+
+The motor viewport now has a transparent, resolution-capped Canvas 2D plasma rim. Three independent wandering strands follow its rounded perimeter with cyan cores, soft outer strokes and occasional small branches. Emergency stop transitions the strands to crimson; ordinary disconnection fades them without a red state. The earlier SVG electric rim remains the fallback if Canvas is unavailable. Decorative rendering is limited to 30 fps on desktop and 20 fps on mobile, and pauses in hidden tabs or reduced-motion mode.
+
+Five visible SVG hotspots identify the field stator, copper winding, rotor, shaft and load brake. Hover or keyboard focus opens a technical card; click, Enter, Space or mobile tap pins it; the close button dismisses it. Escape also dismisses it while retaining the laboratory’s existing Escape emergency-stop shortcut. The card shows actual live simulation values and remains aligned when the view angle or zoom changes. Hotspots work in both Digital Twin and Classic SVG modes.
+
+The existing perspective energy trails were lengthened and brightened modestly with RPM. All effects remain decorative and behind the machine. No physics, graph, safety or observation calculations were changed.
+
 ## V4 cinematic control room
 
 The main machine stage is now the visual centerpiece. A larger motor, calibrated circular energy rings, viewport lighting, technical overlays and raised glass-like instruments create a clear hierarchy. The existing SVG motor and all live readouts remain the functional core.

@@ -42,6 +42,7 @@
         <div class="motor-stage" id="motor-stage">
           <div class="stage-grid"></div>
           <canvas id="energy-trails" class="energy-trails" aria-hidden="true"></canvas>
+          <canvas id="electric-canvas" class="electric-canvas" aria-hidden="true"></canvas>
           <div class="stage-reactor" aria-hidden="true"></div><div class="stage-axis" aria-hidden="true"></div>
           <div class="stage-emergency" aria-hidden="true">EMERGENCY STOP ACTIVE</div>
           <svg class="energy-border motor-energy-border" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect class="electric-base" x="1" y="1" width="98" height="98" rx="2"/><rect class="electric-dash" x="1" y="1" width="98" height="98" rx="2" pathLength="100"/></svg>
@@ -97,7 +98,22 @@
             <path d="M583 261l-9 44h57l-9-44" fill="#223643" stroke="#536b7a"/>
             <g class="svg-label" fill="#9caebc" font-size="10" font-family="monospace" letter-spacing="1.5"><path d="M189 121l-30-53H91M313 236l-19 105h-93M609 139l24-54h66" fill="none" stroke="#58717f"/><text x="90" y="57">FIELD STATOR</text><text x="201" y="360">COPPER ARMATURE</text><text x="587" y="74">LOAD BRAKE</text></g>
             <g fill="#5de5d5"><circle cx="189" cy="121" r="3"/><circle cx="313" cy="236" r="3"/></g><circle cx="609" cy="139" r="3" fill="#f1bb77"/>
+            <g class="motor-hotspots" aria-label="Interactive motor components">
+              <g id="hotspot-stator" class="motor-hotspot" transform="translate(169 151)" tabindex="0" role="button" aria-label="Explore field stator and windings" aria-controls="component-card" aria-expanded="false"><circle class="hotspot-hit" r="25"/><circle class="hotspot-ring" r="12"/><circle class="hotspot-core" r="3"/></g>
+              <g id="hotspot-copper" class="motor-hotspot" transform="translate(294 157)" tabindex="0" role="button" aria-label="Explore copper armature windings" aria-controls="component-card" aria-expanded="false"><circle class="hotspot-hit" r="25"/><circle class="hotspot-ring copper-marker" r="12"/><circle class="hotspot-core copper-marker" r="3"/></g>
+              <g id="hotspot-rotor" class="motor-hotspot" transform="translate(426 198)" tabindex="0" role="button" aria-label="Explore armature rotor" aria-controls="component-card" aria-expanded="false"><circle class="hotspot-hit" r="24"/><circle class="hotspot-ring" r="12"/><circle class="hotspot-core" r="3"/></g>
+              <g id="hotspot-shaft" class="motor-hotspot" transform="translate(539 198)" tabindex="0" role="button" aria-label="Explore output shaft" aria-controls="component-card" aria-expanded="false"><circle class="hotspot-hit" r="23"/><circle class="hotspot-ring" r="12"/><circle class="hotspot-core" r="3"/></g>
+              <g id="hotspot-brake" class="motor-hotspot" transform="translate(608 202)" tabindex="0" role="button" aria-label="Explore mechanical load brake" aria-controls="component-card" aria-expanded="false"><circle class="hotspot-hit" r="27"/><circle class="hotspot-ring copper-marker" r="12"/><circle class="hotspot-core copper-marker" r="3"/></g>
+            </g>
           </svg>
+          <p class="explore-instruction">⌖ Hover or tap motor components to explore.</p>
+          <aside id="component-card" class="component-card" aria-label="Motor component details" hidden>
+            <div class="component-card-top"><span>COMPONENT / LIVE</span><button id="component-close" type="button" aria-label="Close component details">×</button></div>
+            <h3 id="component-title">Motor component</h3>
+            <p id="component-description"></p>
+            <p id="component-principle" class="component-principle"></p>
+            <strong id="component-reading" class="component-reading"></strong>
+          </aside>
         </div>
         <div class="view-adjustments" role="group" aria-label="Visual-only motor view adjustments">
           <label for="view-angle">VIEW ANGLE <output id="view-angle-value">−6°</output></label><input id="view-angle" type="range" min="-14" max="14" step="1" value="-6" aria-label="Visual model viewing angle in degrees">

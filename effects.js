@@ -10,6 +10,9 @@
       this.stage = $('motor-stage');
       this.canvas = $('energy-trails');
       this.ctx = this.canvas && this.canvas.getContext ? this.canvas.getContext('2d') : null;
+      this.electricCanvas = $('electric-canvas');
+      this.electricCtx = this.electricCanvas && this.electricCanvas.getContext ? this.electricCanvas.getContext('2d') : null;
+      if (this.electricCtx) this.stage.classList.add('electric-canvas-ready');
       this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
       this.smallScreen = window.matchMedia('(max-width: 700px)');
       this.paused = document.hidden;
@@ -19,13 +22,32 @@
       this.lastDraw = -Infinity;
       this.canvasHadPaint = false;
       this.lastStrength = '';
+      this.electricLevel = 0;
+      this.electricTarget = 0;
+      this.electricTint = 0;
+      this.electricLastDraw = -Infinity;
+      this.electricHadPaint = false;
+      this.selectedPart = null;
+      this.pinnedPart = null;
+      this.currentReading = null;
+      this.componentCard = $('component-card');
+      this.componentCard.hidden = true;
       this.setPaused(this.paused);
+      if (typeof ResizeObserver !== 'undefined') {
+        this.stageObserver = new ResizeObserver(() => {
+          this.sizeElectricCanvas();
+          if (this.selectedPart) this.positionComponentCard($(this.selectedPart));
+        });
+        this.stageObserver.observe(this.stage);
+      }
       this.bindSpotlights();
       this.bindBursts();
       this.bindReveals();
+      this.bindComponents();
     }
 
     update(reading) {
+      this.currentReading = reading;
       const mode = reading.estop ? 'emergency' : reading.connected ? 'energized' : 'standby';
       if (document.body.dataset.energy !== mode) document.body.dataset.energy = mode;
 
@@ -44,16 +66,23 @@
       this.target = mode === 'energized' && !this.reducedMotion.matches && !this.stage.className.includes('classic-view')
         ? clamp(reading.rpm / 720, 0, 1) * (.62 + .22 * currentLevel)
         : 0;
+      this.electricTarget = !this.reducedMotion.matches && !this.stage.className.includes('classic-view')
+        ? mode === 'energized' ? 1 : mode === 'emergency' ? .73 : 0
+        : 0;
+      if (this.selectedPart) this.updateComponentCard();
     }
 
     setPaused(value) {
       this.paused = Boolean(value);
       document.body.classList.toggle('visuals-paused', this.paused);
       this.lastDraw = -Infinity;
+      this.electricLastDraw = -Infinity;
     }
 
     tick(timestamp, dt, reading) {
-      if (!this.ctx || this.paused || document.hidden) return;
+      if (this.paused || document.hidden) return;
+      this.tickElectric(timestamp, dt, reading);
+      if (!this.ctx) return;
       if (this.reducedMotion.matches || this.stage.className.includes('classic-view') || reading.estop) this.target = 0;
       const mix = 1 - Math.exp(-Math.min(dt, .1) / .24);
       this.opacity += (this.target - this.opacity) * mix;
@@ -87,7 +116,7 @@
         const lane = .14 + (i % 5) * .057;
         const bend = (i % 3 - 1) * .014;
         const head = (this.phase + i * .177) % 1;
-        const tail = Math.max(0, head - (.055 + speed * .037));
+        const tail = Math.max(0, head - (.065 + speed * .095));
         const point = progress => ({
           x: width * (.04 + .88 * progress),
           y: height * (.5 + side * lane * (1 - .48 * progress) + bend * Math.sin(progress * Math.PI))
@@ -104,6 +133,242 @@
       ctx.globalAlpha = 1;
       this.canvasHadPaint = true;
       this.lastDraw = timestamp;
+    }
+
+    sizeElectricCanvas() {
+      if (!this.electricCtx) return null;
+      const width = this.electricCanvas.clientWidth, height = this.electricCanvas.clientHeight;
+      if (width < 24 || height < 24) return null;
+      const dpr = Math.min(window.devicePixelRatio || 1, this.smallScreen.matches ? 1.25 : 1.5);
+      const pixelWidth = Math.round(width * dpr), pixelHeight = Math.round(height * dpr);
+      if (this.electricCanvas.width !== pixelWidth || this.electricCanvas.height !== pixelHeight) {
+        this.electricCanvas.width = pixelWidth;
+        this.electricCanvas.height = pixelHeight;
+        this.electricHadPaint = false;
+      }
+      return { width, height, dpr };
+    }
+
+    tickElectric(timestamp, dt, reading) {
+      if (!this.electricCtx) return; // The existing SVG rim is the Canvas fallback.
+      const disabled = this.reducedMotion.matches || this.stage.className.includes('classic-view');
+      const target = disabled ? 0 : this.electricTarget;
+      const mix = 1 - Math.exp(-Math.min(dt, .1) / .32);
+      this.electricLevel += (target - this.electricLevel) * mix;
+      this.electricTint += ((reading.estop ? 1 : 0) - this.electricTint) * mix;
+      if (this.electricLevel < .004 && target === 0) {
+        this.electricLevel = 0;
+        if (this.electricHadPaint) {
+          this.electricCtx.clearRect(0, 0, this.electricCanvas.width, this.electricCanvas.height);
+          this.electricHadPaint = false;
+        }
+        return;
+      }
+      if (timestamp - this.electricLastDraw < (this.smallScreen.matches ? 50 : 33)) return;
+      const size = this.sizeElectricCanvas();
+      if (!size) return;
+      const { width, height, dpr } = size;
+      const ctx = this.electricCtx;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+      const inset = 5, radius = Math.min(11, width / 8, height / 8);
+      const left = inset, top = inset, right = width - inset, bottom = height - inset;
+      const horizontal = right - left - 2 * radius;
+      const vertical = bottom - top - 2 * radius;
+      const arc = Math.PI * radius / 2;
+      const perimeter = 2 * (horizontal + vertical) + 4 * arc;
+      const corner = (cx, cy, a, distance) => {
+        const angle = a + distance / radius;
+        return { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
+      };
+      const perimeterPoint = raw => {
+        let s = ((raw % perimeter) + perimeter) % perimeter;
+        if (s < horizontal) return { x: left + radius + s, y: top };
+        s -= horizontal;
+        if (s < arc) return corner(right - radius, top + radius, -Math.PI / 2, s);
+        s -= arc;
+        if (s < vertical) return { x: right, y: top + radius + s };
+        s -= vertical;
+        if (s < arc) return corner(right - radius, bottom - radius, 0, s);
+        s -= arc;
+        if (s < horizontal) return { x: right - radius - s, y: bottom };
+        s -= horizontal;
+        if (s < arc) return corner(left + radius, bottom - radius, Math.PI / 2, s);
+        s -= arc;
+        if (s < vertical) return { x: left, y: bottom - radius - s };
+        s -= vertical;
+        return corner(left + radius, top + radius, Math.PI, s);
+      };
+      const time = timestamp / 1000;
+      const tint = this.electricTint;
+      const color = (alpha, warm = false) => {
+        const blue = warm ? [255, 183, 109] : [111, 231, 255];
+        const red = [244, 102, 126];
+        const rgb = blue.map((v, i) => Math.round(v * (1 - tint) + red[i] * tint));
+        return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
+      };
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      for (let strand = 0; strand < 3; strand++) {
+        const direction = strand === 1 ? -1 : 1;
+        const head = (time * (.055 + strand * .013) * direction + strand * .37 + 3) % 1;
+        const length = strand === 0 ? .22 : strand === 1 ? .16 : .12;
+        const points = [];
+        for (let i = 0; i <= 31; i++) {
+          const distance = (head - length + length * i / 31) * perimeter;
+          const p = perimeterPoint(distance), next = perimeterPoint(distance + 1);
+          const dx = next.x - p.x, dy = next.y - p.y;
+          const norm = Math.hypot(dx, dy) || 1;
+          const irregularity = Math.sin(distance * .11 + time * 5.2 + strand * 2.4) * 2.4
+            + Math.sin(distance * .39 - time * 7.1 + strand * 4.1) * 1.25;
+          points.push({ x: p.x - dy / norm * irregularity, y: p.y + dx / norm * irregularity });
+        }
+        const trace = () => {
+          ctx.beginPath();
+          points.forEach((point, i) => i ? ctx.lineTo(point.x, point.y) : ctx.moveTo(point.x, point.y));
+        };
+        const warm = strand === 2 && !reading.estop;
+        trace();
+        ctx.strokeStyle = color(.16 * this.electricLevel, warm);
+        ctx.lineWidth = 11;
+        ctx.stroke();
+        trace();
+        ctx.strokeStyle = color(.47 * this.electricLevel, warm);
+        ctx.lineWidth = 4.5;
+        ctx.stroke();
+        trace();
+        ctx.strokeStyle = color(.96 * this.electricLevel, warm);
+        ctx.lineWidth = 1.35;
+        ctx.stroke();
+        const branchPulse = Math.pow(Math.max(0, Math.sin(time * 1.4 + strand * 2.7)), 18);
+        if (branchPulse > .12) {
+          const a = points[19], b = points[20];
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const norm = Math.hypot(dx, dy) || 1;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(a.x - dy / norm * 7 + dx / norm * 3, a.y + dx / norm * 7 + dy / norm * 3);
+          ctx.lineTo(a.x - dy / norm * 11 + dx / norm * 8, a.y + dx / norm * 11 + dy / norm * 8);
+          ctx.strokeStyle = color(branchPulse * this.electricLevel * .8);
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+      this.electricHadPaint = true;
+      this.electricLastDraw = timestamp;
+    }
+
+    bindComponents() {
+      this.componentParts = {
+        stator: {
+          name: 'FIELD STATOR / WINDINGS',
+          description: 'The stationary field establishes magnetic flux through the armature.',
+          principle: 'A separately regulated 120 V field sets K = 0.25 + 0.55 Iꜰ.',
+          reading: r => `Field ${r.field.toFixed(2)} A  ·  K ${r.K.toFixed(3)} V·s/rad`
+        },
+        rotor: {
+          name: 'ARMATURE / ROTOR',
+          description: 'Electromagnetic torque accelerates the rotating assembly and drives the output shaft.',
+          principle: 'Tₑ = K Iₐ; inertia and opposing torque set angular acceleration.',
+          reading: r => `Speed ${Math.round(r.rpm).toLocaleString('en-US')} RPM  ·  Tₑ ${r.torque.toFixed(2)} N·m`
+        },
+        copper: {
+          name: 'COPPER ARMATURE WINDINGS',
+          description: 'Armature conductors carry the signed current produced by supply voltage and back EMF.',
+          principle: 'Iₐ = (Vₐ − Kω) / Rₐ; copper heating is Iₐ²Rₐ.',
+          reading: r => `Iₐ ${r.current.toFixed(2)} A  ·  copper loss ${r.copperLoss.toFixed(0)} W`
+        },
+        shaft: {
+          name: 'OUTPUT SHAFT',
+          description: 'The steel shaft carries the rotor’s rotation to the coupled load brake.',
+          principle: 'Useful load output is the selected load torque times angular speed.',
+          reading: r => `Speed ${Math.round(r.rpm).toLocaleString('en-US')} RPM  ·  load output ${(r.outputPower / 1000).toFixed(3)} kW`
+        },
+        brake: {
+          name: 'MECHANICAL LOAD BRAKE',
+          description: 'The selected mechanical load resists forward rotation and draws useful shaft power.',
+          principle: 'Load torque opposes electromagnetic torque in J dω/dt = Tₑ − Tʟ − Bω.',
+          reading: r => `Load ${r.load.toFixed(1)} N·m  ·  output ${(r.outputPower / 1000).toFixed(3)} kW`
+        }
+      };
+      Object.keys(this.componentParts).forEach(part => {
+        const hotspot = $('hotspot-' + part);
+        if (!hotspot) return;
+        hotspot.addEventListener('pointerenter', () => {
+          if (!this.pinnedPart) this.showComponent(part);
+        });
+        hotspot.addEventListener('pointerleave', () => {
+          if (!this.pinnedPart) this.hideComponent();
+        });
+        hotspot.addEventListener('focus', () => {
+          if (!this.pinnedPart) this.showComponent(part);
+        });
+        hotspot.addEventListener('blur', () => {
+          if (!this.pinnedPart) this.hideComponent();
+        });
+        hotspot.addEventListener('click', () => {
+          if (this.pinnedPart === part) this.hideComponent();
+          else { this.pinnedPart = part; this.showComponent(part); }
+        });
+        hotspot.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            if (this.pinnedPart === part) this.hideComponent();
+            else { this.pinnedPart = part; this.showComponent(part); }
+          }
+        });
+      });
+      $('component-close').addEventListener('click', () => this.hideComponent());
+      window.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && this.selectedPart) this.hideComponent();
+      });
+    }
+
+    showComponent(part) {
+      this.selectedPart = part;
+      this.componentCard.hidden = false;
+      Object.keys(this.componentParts).forEach(name => {
+        const hotspot = $('hotspot-' + name);
+        hotspot.classList.toggle('is-selected', name === part);
+        hotspot.setAttribute('aria-expanded', String(name === part));
+      });
+      this.updateComponentCard();
+      this.positionComponentCard($('hotspot-' + part));
+    }
+
+    updateComponentCard() {
+      if (!this.selectedPart || !this.currentReading) return;
+      const item = this.componentParts[this.selectedPart];
+      $('component-title').textContent = item.name;
+      $('component-description').textContent = item.description;
+      $('component-principle').textContent = item.principle;
+      const live = item.reading(this.currentReading);
+      if ($('component-reading').textContent !== live) $('component-reading').textContent = live;
+    }
+
+    positionComponentCard(hotspot) {
+      if (!hotspot || this.componentCard.hidden) return;
+      const stage = this.stage.getBoundingClientRect();
+      const anchor = hotspot.getBoundingClientRect();
+      const card = this.componentCard.getBoundingClientRect();
+      const left = clamp(anchor.left - stage.left + anchor.width / 2 - card.width / 2,
+        8, Math.max(8, stage.width - card.width - 8));
+      const above = anchor.top - stage.top - card.height - 16;
+      const below = anchor.top + anchor.height - stage.top + 16;
+      const top = above >= 8 ? above : clamp(below, 8, Math.max(8, stage.height - card.height - 8));
+      this.componentCard.style.left = Math.round(left) + 'px';
+      this.componentCard.style.top = Math.round(top) + 'px';
+    }
+
+    hideComponent() {
+      this.selectedPart = null;
+      this.pinnedPart = null;
+      this.componentCard.hidden = true;
+      Object.keys(this.componentParts).forEach(part => {
+        const hotspot = $('hotspot-' + part);
+        hotspot.classList.remove('is-selected');
+        hotspot.setAttribute('aria-expanded', 'false');
+      });
     }
 
     bindSpotlights() {
