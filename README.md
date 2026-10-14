@@ -2,6 +2,14 @@
 
 A completely offline, interactive simulator of a separately excited DC motor. Built for SIMULAB 2026 with HTML5, CSS3, vanilla JavaScript, inline SVG and native Canvas.
 
+## V4 cinematic control room
+
+The main machine stage is now the visual centerpiece. A larger motor, calibrated circular energy rings, viewport lighting, technical overlays and raised glass-like instruments create a clear hierarchy. The existing SVG motor and all live readouts remain the functional core.
+
+The page has three presentation states: standby is deep navy; armature connection produces obvious cyan and copper illumination; emergency stop produces a crimson field and an explicit stage indicator while the shaft physically coasts. An ordinary disconnect returns to standby without emergency styling. The limited Canvas trails remain behind the SVG and respond to actual RPM. The decorative rings and effects pause with hidden tabs and respect reduced-motion settings. Classic SVG mode removes the new motor-stage decorations and shows the original vector model.
+
+V4 changed only index.html, style.css, effects.js and this README. physics.js, graphs.js and app.js are unchanged. No runtime dependencies or network assets are used.
+
 ## V3 reactive energy display
 
 Three display states follow the existing motor model: **Standby** keeps near-black/navy lighting after an ordinary armature disconnect; **Energized** adds restrained cyan and copper illumination while the armature is connected; **Emergency stop** switches to a dark crimson atmosphere while the rotor continues its physical coast-down. Releasing the stop latch returns to standby. Visual color changes take about 0.78 seconds and never delay safety readings or change electrical calculations.

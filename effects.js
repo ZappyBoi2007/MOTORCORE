@@ -42,7 +42,7 @@
         this.lastStrength = key;
       }
       this.target = mode === 'energized' && !this.reducedMotion.matches && !this.stage.className.includes('classic-view')
-        ? clamp(reading.rpm / 850, 0, 1) * (.32 + .18 * currentLevel)
+        ? clamp(reading.rpm / 720, 0, 1) * (.62 + .22 * currentLevel)
         : 0;
     }
 
@@ -97,8 +97,8 @@
           const p = point(tail + (head - tail) * segment / 7);
           if (segment === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
         }
-        ctx.strokeStyle = i % 4 === 0 ? 'rgba(239,181,106,.47)' : 'rgba(106,221,234,.38)';
-        ctx.lineWidth = i % 3 === 0 ? 1.8 : 1.15;
+        ctx.strokeStyle = i % 4 === 0 ? 'rgba(255,190,108,.74)' : 'rgba(103,222,252,.67)';
+        ctx.lineWidth = i % 3 === 0 ? 2.2 : 1.45;
         ctx.stroke();
       }
       ctx.globalAlpha = 1;
