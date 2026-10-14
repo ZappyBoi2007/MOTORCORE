@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b111a">
+  <meta name="description" content="MOTORCORE — an offline, interactive separately excited DC motor laboratory.">
+  <title>MOTORCORE | DC Motor Test Bench</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b111a'/%3E%3Cpath d='M6 23V9l10 10L26 9v14' fill='none' stroke='%235de5d5' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <script src="physics.js" defer></script>
+  <script src="graphs.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#controls">Skip to controls</a>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="MOTORCORE home"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M5 27V9l13 13L31 9v18"/><path d="M13 27v-7m10 7v-7"/></svg><span>MOTOR<span class="brand-light">CORE</span><small>VIRTUAL MACHINES LAB</small></span></a>
+    <div class="header-meta"><span class="edition">SIMULAB / 2026</span><span class="separator"></span><span>EXPERIMENT 01</span></div>
+    <div class="header-actions"><span class="state-pill" id="run-state"><i></i>STANDBY</span><button class="emergency" id="estop" type="button"><span aria-hidden="true">■</span> EMERGENCY STOP <kbd>Esc</kbd></button></div>
+  </header>
+  <main id="top">
+    <section class="intro" aria-labelledby="page-title"><div><div class="eyebrow">ELECTROMECHANICAL SYSTEMS <span>/</span> DC MACHINES</div><h1>DC motor <span>test bench.</span></h1><p>A separately excited machine. Every input, every response, in view.</p></div><div class="session-meta"><span class="offline-dot"></span> OFFLINE LAB<span class="session-clock">SIM TIME <strong id="sim-time">00:00.0</strong></span></div></section>
+    <div class="bench-grid">
+      <section class="card control-card" id="controls" aria-labelledby="controls-title">
+        <div class="card-heading"><h2 id="controls-title"><span class="section-number">01</span> Input controls</h2><span class="micro">SETPOINTS</span></div>
+        <div class="control-block cyan"><div class="control-label"><label for="voltage">Armature voltage</label><span>Vₐ</span></div><div class="control-value"><input id="voltage-number" type="number" min="0" max="240" step="1" value="180" aria-label="Armature voltage in volts"><span>V</span></div><input id="voltage" type="range" min="0" max="240" step="1" value="180"><div class="range-scale"><span>0</span><span>120</span><span>240 V</span></div></div>
+        <div class="control-block teal"><div class="control-label"><label for="field">Field current</label><span>Iꜰ</span></div><div class="control-value"><input id="field-number" type="number" min="0.3" max="1.5" step="0.01" value="1.00" aria-label="Field current in amperes"><span>A</span></div><input id="field" type="range" min="0.3" max="1.5" step="0.01" value="1"><div class="range-scale"><span>0.3</span><span>0.9</span><span>1.5 A</span></div></div>
+        <div class="control-block amber"><div class="control-label"><label for="load">Mechanical load</label><span>Tʟ</span></div><div class="control-value"><input id="load-number" type="number" min="0" max="20" step="0.1" value="5.0" aria-label="Mechanical load torque in newton metres"><span>N·m</span></div><input id="load" type="range" min="0" max="20" step="0.1" value="5"><div class="range-scale"><span>0</span><span>10</span><span>20 N·m</span></div></div>
+        <div class="control-actions"><button class="button primary" id="run" type="button"><span aria-hidden="true">▶</span> Energize motor</button><button class="button subtle" id="reset" type="button">↺ Reset motor</button></div>
+        <p class="control-note" id="control-note">Field energized at 120 V. Armature circuit open.</p>
+        <div class="presets"><span class="micro">QUICK SETPOINTS</span><div><button type="button" data-preset="nominal">Nominal</button><button type="button" data-preset="weak">Weak field</button><button type="button" data-preset="load">Load test</button></div></div>
+      </section>
+      <section class="card machine-card" aria-labelledby="machine-title">
+        <div class="card-heading"><h2 id="machine-title"><span class="section-number">02</span> Machine view</h2><span class="live-label"><i></i> LIVE MODEL</span></div>
+        <div class="machine-topline"><span class="machine-code">MC–240 <span>/ SEPARATELY EXCITED DC</span></span><span id="rotation-status">AT REST</span></div>
+        <div class="motor-stage">
+          <div class="stage-grid"></div>
+          <svg id="motor-svg" viewBox="0 0 760 380" role="img" aria-labelledby="motor-svg-title motor-svg-desc">
+            <title id="motor-svg-title">Animated cutaway DC motor and mechanical load</title><desc id="motor-svg-desc">Copper armature, field poles, front rotor and output shaft. Rotation follows simulated speed at one fortieth scale for legibility.</desc>
+            <defs>
+              <linearGradient id="housing" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#55687a"/><stop offset=".35" stop-color="#293c4f"/><stop offset=".6" stop-color="#152431"/><stop offset="1" stop-color="#314554"/></linearGradient>
+              <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9baebc"/><stop offset=".23" stop-color="#d6e5e8"/><stop offset=".48" stop-color="#5d7385"/><stop offset=".76" stop-color="#263c4c"/><stop offset="1" stop-color="#69838f"/></linearGradient>
+              <linearGradient id="copper" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe0a1"/><stop offset=".35" stop-color="#d89d50"/><stop offset=".75" stop-color="#784724"/><stop offset="1" stop-color="#edb778"/></linearGradient>
+              <radialGradient id="endplate"><stop stop-color="#1b2a38"/><stop offset=".78" stop-color="#304858"/><stop offset=".82" stop-color="#6b8594"/><stop offset=".91" stop-color="#283e4e"/><stop offset="1" stop-color="#101c27"/></radialGradient>
+              <radialGradient id="floor-glow"><stop stop-color="#44d8c2" stop-opacity=".15"/><stop offset="1" stop-color="#44d8c2" stop-opacity="0"/></radialGradient>
+              <pattern id="coil" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="9" height="12" fill="url(#copper)"/><rect x="9" width="3" height="12" fill="#4d3529"/></pattern>
+            </defs>
+            <ellipse cx="360" cy="310" rx="285" ry="53" fill="url(#floor-glow)"/>
+            <g stroke="#294152" stroke-width="1" fill="none"><path d="M85 317H666M131 329H621"/><path stroke-dasharray="4 7" d="M62 204H694"/></g>
+            <g fill="#233746" stroke="#526779"><path d="M222 267l-15 42h67l15-42z"/><path d="M391 267l-5 42h66l5-42z"/><rect x="191" y="305" width="287" height="12" rx="4"/></g>
+            <g fill="#0b141e" stroke="#7e919b"><ellipse cx="223" cy="311" rx="7" ry="2"/><ellipse cx="447" cy="311" rx="7" ry="2"/></g>
+            <path d="M206 105h219v187H206c-52 0-76-39-76-94s24-93 76-93" fill="url(#housing)" stroke="#6b8090"/>
+            <ellipse cx="206" cy="198" rx="76" ry="93" fill="#263e4d" stroke="#6c8190"/>
+            <ellipse cx="207" cy="198" rx="63" ry="80" fill="#12202b" stroke="#3c5669"/>
+            <g stroke="#78919e" stroke-width="3" opacity=".55"><path d="M172 127h233M157 145h252M148 165h255M146 229h259M154 251h257M169 270h245"/></g>
+            <path d="M213 133h217v135H213c-41-18-43-113 0-135" fill="#101c27" stroke="#78919e" stroke-width="2"/>
+            <path d="M217 142h211v28H211zM211 234h217v26H217z" fill="url(#coil)" stroke="#d4a05c"/>
+            <g id="flux-lines" fill="none" stroke="#5de5d5" stroke-width="1.2" opacity=".5" stroke-dasharray="6 8"><path d="M204 130q112-55 231 0M214 119q102-56 210 0M204 273q112 52 231 0M215 283q103 47 209 0"/></g>
+            <rect x="178" y="188" width="307" height="25" rx="9" fill="url(#steel)"/>
+            <g id="armature-lines"><rect x="230" y="174" width="206" height="57" rx="12" fill="url(#coil)" stroke="#d9aa6d"/><path id="winding-highlight" d="M242 180h181" stroke="#ffdc99" stroke-width="3" opacity=".7"/></g>
+            <g><rect x="265" y="79" width="83" height="31" rx="5" fill="url(#housing)" stroke="#698292"/><rect x="279" y="72" width="56" height="10" rx="3" fill="#172633" stroke="#5e7788"/><circle cx="285" cy="94" r="4" fill="#5de5d5"/><circle cx="329" cy="94" r="4" fill="#ffc779"/></g>
+            <ellipse cx="426" cy="198" rx="80" ry="98" fill="url(#endplate)" stroke="#8298a5" stroke-width="2"/>
+            <ellipse cx="426" cy="198" rx="62" ry="79" fill="#0c1924" stroke="#466677"/>
+            <g transform="translate(426 198) scale(.78 1)"><g id="rotor"><circle r="63" fill="#1e3441" stroke="#4a6575" stroke-width="2"/><g fill="url(#copper)" stroke="#6e4b2e" stroke-width="2"><path d="M-11-53h22l8 26h-38z"/><path d="M-11-53h22l8 26h-38z" transform="rotate(60)"/><path d="M-11-53h22l8 26h-38z" transform="rotate(120)"/><path d="M-11-53h22l8 26h-38z" transform="rotate(180)"/><path d="M-11-53h22l8 26h-38z" transform="rotate(240)"/><path d="M-11-53h22l8 26h-38z" transform="rotate(300)"/></g><circle r="26" fill="url(#steel)" stroke="#91b6bf"/><path d="M0-22V-10" stroke="#75ffdd" stroke-width="5" stroke-linecap="round"/></g></g>
+            <g fill="#a6b7c0" stroke="#172a37" stroke-width="2"><circle cx="426" cy="108" r="5"/><circle cx="426" cy="288" r="5"/><circle cx="355" cy="198" r="5"/><circle cx="497" cy="198" r="5"/></g>
+            <rect x="426" y="187" width="166" height="24" rx="3" fill="url(#steel)" stroke="#93a9b4"/>
+            <path id="shaft-stripe" d="M447 192h126" stroke="#dff8f5" stroke-width="3" opacity=".7"/>
+            <rect x="537" y="179" width="29" height="40" rx="5" fill="url(#housing)" stroke="#88a1ae"/>
+            <ellipse cx="599" cy="200" rx="37" ry="63" fill="url(#housing)" stroke="#8da3af"/>
+            <ellipse cx="608" cy="200" rx="29" ry="58" fill="#132330" stroke="#57717f"/>
+            <g transform="translate(608 200) scale(.5 1)"><g id="load-rotor" stroke="#c7985f" stroke-width="4"><circle r="44" fill="none" stroke="#4a5d66"/><path d="M0-40V-15M0 15v25M-40 0h25M15 0h25"/></g></g>
+            <path d="M583 261l-9 44h57l-9-44" fill="#223643" stroke="#536b7a"/>
+            <g class="svg-label" fill="#9caebc" font-size="10" font-family="monospace" letter-spacing="1.5"><path d="M189 121l-30-53H91M313 236l-19 105h-93M609 139l24-54h66" fill="none" stroke="#58717f"/><text x="90" y="57">FIELD STATOR</text><text x="201" y="360">COPPER ARMATURE</text><text x="587" y="74">LOAD BRAKE</text></g>
+            <g fill="#5de5d5"><circle cx="189" cy="121" r="3"/><circle cx="313" cy="236" r="3"/></g><circle cx="609" cy="139" r="3" fill="#f1bb77"/>
+          </svg>
+        </div>
+        <div class="machine-footer"><span><i class="legend-dot teal-dot"></i> FIELD FLUX <strong id="flux-value">0.800</strong> <small>V·s/rad</small></span><span>ROTATION <strong>1:40</strong> VISUAL SCALE</span></div>
+        <div class="circuit-strip"><div><span class="micro">ARMATURE CIRCUIT</span><strong id="circuit-state">OPEN</strong></div><svg viewBox="0 0 300 36" aria-hidden="true"><path d="M0 18h56M81 18h55M174 18h126" stroke="currentColor" fill="none" stroke-width="2"/><path id="switch-open" d="M56 18l25-13" stroke="currentColor" fill="none" stroke-width="2"/><circle cx="155" cy="18" r="17" fill="none" stroke="currentColor"/><text x="155" y="23" fill="currentColor" text-anchor="middle" font-size="15">M</text><g id="current-particles" fill="#5de5d5"><circle cx="15" cy="18" r="3"/><circle cx="105" cy="18" r="3"/><circle cx="210" cy="18" r="3"/></g><path id="switch-closed" d="M56 18h25" stroke="#5de5d5" stroke-width="3"/></svg><div class="circuit-current"><strong id="flow-value">0.00 A</strong><span id="flow-mode">NO ARMATURE CURRENT</span></div></div>
+        <div class="status-area" id="safety-status" role="status" aria-live="polite"></div>
+      </section>
+      <section class="card instruments-card" aria-labelledby="instruments-title">
+        <div class="card-heading"><h2 id="instruments-title"><span class="section-number">03</span> Instruments</h2><span class="micro">LIVE</span></div>
+        <div class="speed-instrument"><span class="micro">SHAFT SPEED</span><div class="speed-value"><strong id="rpm-value">0</strong><span>RPM</span></div><div class="speed-track"><span id="speed-bar"></span><i></i></div><div class="range-scale"><span>0</span><span>4,000 limit</span><span>6,000</span></div><div class="settle-label" id="settle-state">Armature disconnected</div></div>
+        <div class="readout-grid">
+          <div class="readout"><span>Armature current</span><strong id="current-value">0.00</strong><small>A</small></div>
+          <div class="readout"><span>Applied voltage</span><strong id="voltage-value">0.0</strong><small>V</small></div>
+          <div class="readout"><span>Field current</span><strong id="field-value">1.00</strong><small>A</small></div>
+          <div class="readout"><span>EM torque</span><strong id="torque-value">0.00</strong><small>N·m</small></div>
+          <div class="readout"><span>Load shaft power</span><strong id="power-value">0.000</strong><small>kW</small></div>
+          <div class="readout"><span>Total efficiency</span><strong id="efficiency-value">—</strong><small>%</small></div>
+        </div>
+        <p id="efficiency-note" class="instrument-note">Efficiency shown only in steady motoring with useful load output.</p>
+        <div class="power-details"><div><span>Back EMF</span><strong id="emf-value">0.0 V</strong></div><div><span>Electrical input, total</span><strong id="input-value">0.120 kW</strong></div><div><span>Copper + friction losses</span><strong id="loss-value">0.000 kW</strong></div><div><span>Field input</span><strong id="field-power-value">120 W</strong></div></div>
+        <button class="button record-button" id="record" type="button"><span aria-hidden="true">⊕</span> Record observation <kbd>R</kbd></button>
+      </section>
+    </div>
+    <section class="characteristics" aria-labelledby="graphs-title"><div class="section-heading"><div><span class="eyebrow">PREDICT THE RESPONSE</span><h2 id="graphs-title">Machine characteristics</h2></div><div class="graph-legend"><span><i class="legend-line"></i> Equilibrium sweep</span><span><i class="legend-dot teal-dot"></i> Setpoint prediction</span><span><b class="cross">+</b> Live reading</span></div></div><p class="section-description" id="graph-context">Equilibrium curves use commanded setpoints. The live marker shows the instantaneous simulation.</p>
+      <div class="graphs-grid">
+        <article class="card graph-card"><div class="graph-heading"><h3>Speed / armature voltage</h3><span class="graph-index">01</span></div><p id="voltage-graph-subtitle">Fixed field &amp; load</p><div class="canvas-wrap"><canvas id="voltage-graph" tabindex="0" role="img" aria-label="Equilibrium speed versus armature voltage, zero to 240 volts"></canvas><output class="graph-tooltip" id="voltage-graph-tooltip"></output></div><div class="graph-foot" id="voltage-graph-summary"></div></article>
+        <article class="card graph-card"><div class="graph-heading"><h3>Speed / field current</h3><span class="graph-index">02</span></div><p id="field-graph-subtitle">Fixed voltage &amp; load</p><div class="canvas-wrap"><canvas id="field-graph" tabindex="0" role="img" aria-label="Equilibrium speed versus field current, 0.3 to 1.5 amperes"></canvas><output class="graph-tooltip" id="field-graph-tooltip"></output></div><div class="graph-foot" id="field-graph-summary"></div></article>
+        <article class="card graph-card"><div class="graph-heading"><h3>Armature current / load</h3><span class="graph-index">03</span></div><p id="load-graph-subtitle">Fixed voltage &amp; field</p><div class="canvas-wrap"><canvas id="load-graph" tabindex="0" role="img" aria-label="Equilibrium armature current versus mechanical load, zero to 20 newton metres"></canvas><output class="graph-tooltip" id="load-graph-tooltip"></output></div><div class="graph-foot" id="load-graph-summary"></div></article>
+      </div>
+    </section>
+    <section class="card observations" aria-labelledby="observations-title"><div class="observations-heading"><div><span class="eyebrow">EXPERIMENT LOG</span><h2 id="observations-title">Recorded observations <span id="observation-count">00</span></h2><p>Capture instantaneous readings. Select any two trials to compare.</p></div><div class="table-actions"><button class="button subtle" id="clear-records" type="button" disabled>Clear log</button><button class="button export-button" id="download" type="button" disabled>↓ Export CSV</button></div></div><div id="comparison" class="comparison" hidden></div><div class="table-scroll"><table><caption class="sr-only">Recorded instantaneous motor readings; efficiency is blank outside steady motoring.</caption><thead><tr><th scope="col">Compare</th><th scope="col">Trial / time</th><th scope="col">State</th><th scope="col">Vₐ <small>V</small></th><th scope="col">Iꜰ <small>A</small></th><th scope="col">Load <small>N·m</small></th><th scope="col">Speed <small>RPM</small></th><th scope="col">Iₐ <small>A</small></th><th scope="col">Tₑ <small>N·m</small></th><th scope="col">Pout <small>kW</small></th><th scope="col">η <small>%</small></th><th scope="col"><span class="sr-only">Remove</span></th></tr></thead><tbody id="observation-rows"></tbody></table></div><div class="empty-state" id="empty-state"><span class="empty-icon">⊕</span><div><strong>Your next discovery starts with a reading.</strong><p>Energize the motor, adjust the inputs, then select “Record observation”.</p></div></div><div class="table-footer"><span id="log-status">Session log · stored in this tab · export before closing</span><span>INSTANTANEOUS DATA</span></div></section>
+    <section class="knowledge-grid">
+      <details class="card theory" open><summary><span><span class="section-number">04</span> Inside the model</span><span class="details-symbol">+</span></summary><div class="details-body"><p>Electrical input becomes torque, kinetic energy, load output and heat. The shaft responds over time; it never jumps to a predicted equilibrium.</p><div class="equations"><code>K = 0.25 + 0.55 Iꜰ</code><code>E = Kω &nbsp; · &nbsp; Iₐ = (Vₐ − E) / Rₐ</code><code>Tₑ = KIₐ &nbsp; · &nbsp; J dω/dt = Tₑ − Tʟ − Bω</code><code>n = 60ω / (2π)</code></div><div class="constant-tags"><span>Rₐ <b>2 Ω</b></span><span>J <b>0.5 kg·m²</b></span><span>B <b>0.012 N·m·s/rad</b></span><span>Vꜰ <b>120 V</b></span></div><h3>Equilibrium, not a recorded measurement</h3><code class="equilibrium-equation">ωeq = max(0, (KVₐ/Rₐ − Tʟ) / (K²/Rₐ + B))</code><p>Each graph sweeps one input while holding the other two at their setpoints. A dot marks predicted equilibrium; a cross marks the live state. Hover, touch, or use arrow keys on a graph to inspect the sweep.</p><h3>Power accounting</h3><p>Pinput = VₐIₐ + VꜰIꜰ; Pout = Tʟω. Losses are Iₐ²Rₐ, Bω² and field input VꜰIꜰ. The remaining power changes stored rotor energy ½Jω². Total efficiency is Pout / Pinput, shown only near steady motoring with positive useful output.</p><h3>Model assumptions</h3><p>Ideal field-current regulation, constant resistance and inertia, no inductance, saturation, brush drop or thermal dynamics. The connected armature supply can absorb regenerative power. Reducing voltage can make armature current and torque negative; at a zero-volt setpoint, the connected armature dynamically brakes through its resistance. Disconnect or emergency stop instead opens the circuit. A passive load resists forward motion and holds the shaft at zero rather than driving it backward. Stalled torque is balanced by a load reaction. Open-circuit armature current is zero; the field remains energized.</p><p>Midpoint integration uses steps no larger than 1/240 s. Frames are bounded to 0.1 s; a hidden tab pauses simulation time. Rotation is smoothly integrated at 1:40 visual scale. Reduced-motion preferences suppress decorative movement, with all readings still live.</p></div></details>
+      <details class="card safety-info" open><summary><span><span class="section-number">05</span> Operating envelope</span><span class="details-symbol">+</span></summary><div class="details-body"><div class="safety-rule"><span class="warning-icon">!</span><div><h3>Overspeed <b>&gt; 4,000 RPM</b></h3><p>Reduce voltage or increase field current. Weakening the field can raise equilibrium speed.</p></div></div><div class="safety-rule"><span class="warning-icon">!</span><div><h3>Excess current <b>|Iₐ| &gt; 60 A</b></h3><p>Includes startup and regenerative current. Reduce voltage or load as appropriate and allow transients to settle.</p></div></div><div class="safety-rule"><span class="warning-icon">!</span><div><h3>Stall <b>Insufficient starting torque</b></h3><p>At rest, Tₑ ≤ Tʟ with armature voltage applied. Reduce load or increase available starting torque.</p></div></div><div class="safety-rule"><span class="warning-icon">!</span><div><h3>Field weakening <b>Iꜰ &lt; 0.50 A</b></h3><p>Less flux means less torque per ampere. Watch both speed and current.</p></div></div><div class="stop-info"><strong>Emergency stop opens the armature circuit.</strong><p>The shaft coasts under friction and the selected load; field excitation remains on. Release the stop latch, then explicitly energize to restart. Escape always activates the stop.</p></div><p class="safety-footnote">Illustrative lab warning thresholds, not manufacturer ratings. Warnings do not automatically trip the motor. This model is an educational simulation.</p></div></details>
+    </section>
+    <footer class="page-footer"><span>MOTORCORE <span class="footer-slash">/</span> ENGINEER YOUR INTUITION.</span><span>SIMULAB 2026 · LOCAL COMPUTATION · ZERO DEPENDENCIES</span></footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><div class="noscript">Enable JavaScript to run the MOTORCORE simulator.</div></noscript>
+</body>
+</html>
+
+
